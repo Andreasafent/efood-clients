@@ -16,7 +16,7 @@ function Header(){
                         <NavLink
                             to="/login"
                             className={({isActive})=>
-                                isActive ? "bg-neutral-600" : ""
+                                isActive ? "bg-gray-300" : ""
                             }
                         >
                             Login
