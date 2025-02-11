@@ -16,10 +16,20 @@ function Header(){
                         <NavLink
                             to="/login"
                             className={({isActive})=>
-                                isActive ? "bg-gray-300" : ""
+                                isActive ? "bg-gray-500" : ""
                             }
                         >
                             Login
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/register"
+                            className={({isActive})=>
+                                isActive ? "bg-gray-500" : ""
+                            }
+                        >
+                            Register
                         </NavLink>
                     </li>
                     {/* <li>
