@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "../api/axiosInstance";
+import axiosInstance from "../api/axiosInstance";
 
 function Register(){
     const [name, setName] = useState("");
@@ -12,7 +12,7 @@ function Register(){
         //     alert("Passwords do not match!")
         //     return;
         // }
-        axios.post("/client/auth/register", {name, email, password})
+        axiosInstance.post("/client/auth/register", {name, email, password})
             .then((response) =>{
                 console.log(response);
             })

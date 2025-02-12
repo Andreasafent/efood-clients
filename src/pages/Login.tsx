@@ -1,16 +1,16 @@
 import { useState } from "react";
-import axios from "../api/axiosInstance";
+import { useAuth } from "../context/AuthContext";
+
 
 function Login(){
+    const {user, token, login} = useAuth();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const login = () => {
-        axios.post("/client/auth/login", {email, password})
-            .then((response) =>{
-                console.log(response);
-            })
-    };
+    const onLogin = ()=>{
+        login({email, password});
+    }
 
     return (
         <div className="flex justify-center h-[200px] items-center">
@@ -38,7 +38,7 @@ function Login(){
                         }}
                     />
                 </label>
-                <button className="btn btn-primary" onClick={login}>Login</button>
+                <button className="btn btn-primary" onClick={onLogin}>Login</button>
             </form>
         </div>
     );
