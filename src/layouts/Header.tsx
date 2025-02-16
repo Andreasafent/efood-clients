@@ -126,12 +126,19 @@ function Header() {
                                     Hello, {user?.name}
                                 </div>
                                 <MenuItem>
-                                    <a
-                                        href="#"
-                                        className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
+                                    <NavLink
+                                        to={"/profile"}
+                                        className={({ isActive }) => {
+                                            return classNames(
+                                                isActive
+                                                    ? "bg-gray-200"
+                                                    : "",
+                                                "block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
+                                            );
+                                        }}
                                     >
-                                        Your Profile
-                                    </a>
+                                        Profile
+                                    </NavLink>
                                 </MenuItem>
                                 <MenuItem>
                                     <a
