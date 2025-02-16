@@ -8,17 +8,22 @@ import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import Profile from './pages/Profile.tsx'
+import ProtectedRoute from './component/ProtectedRoute.tsx'
 
 createRoot(document.getElementById('root')!).render(
         <BrowserRouter>
             <AuthProvider>
                 <Routes>
                     <Route element={<MainLayout/>}>
-                        <Route path="/" element={<Home />}></Route>
+                        <Route path="/" element={<Home />}/>
                         {/* Auth */}
-                        <Route path="/login" element={<Login />}></Route>
-                        <Route path="/register" element={<Register />}></Route>
-                        <Route path="/profile" element={<Profile />}></Route>
+                        <Route path="/login" element={<Login />}/>
+                        <Route path="/register" element={<Register />}/>
+                        <Route path="/profile" element={
+                            <ProtectedRoute>
+                                <Profile />
+                            </ProtectedRoute>
+                        } />
                     </Route>
                 </Routes>
             </AuthProvider>

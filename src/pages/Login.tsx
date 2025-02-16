@@ -22,7 +22,7 @@ function Login() {
                         className="mx-auto h-10 w-auto"
                     />
                     <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-                        Sign in to your account
+                        Login to your account
                     </h2>
                 </div>
 
@@ -86,7 +86,7 @@ function Login() {
                                 type="submit"
                                 className="flex w-full justify-center btn btn-primary"
                             >
-                                Sign in
+                                Log in
                             </button>
                             <Link
                                 to={"/register"}

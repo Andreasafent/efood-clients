@@ -18,7 +18,12 @@ const AuthContext = createContext<{
 });
 
 export const AuthProvider = ({ children })=>{
-    const [user, setUser] = useState<User | null>(null);
+	const localStorageUser = localStorage.getItem('user');
+    const [user, setUser] = useState<User | null>(
+		localStorageUser 
+			? JSON.parse(localStorageUser) 
+			: null
+	);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 	const navigate = useNavigate();
 
@@ -26,8 +31,9 @@ export const AuthProvider = ({ children })=>{
         if (token) {
             axiosInstance.get("/client/users/me")
                 .then((response) => {
-                    console.log(response.data);
                     setUser(response.data);
+					localStorage.setItem("user", JSON.stringify(response.data));
+
                 })
         }
     }, [token]);
@@ -66,6 +72,7 @@ export const AuthProvider = ({ children })=>{
 		setUser(data.user);
 		setToken(data.token);
 		localStorage.setItem("token", data.token);
+		localStorage.setItem("user", JSON.stringify(data.user));
 		navigate("/");
 	}
 	
@@ -73,6 +80,7 @@ export const AuthProvider = ({ children })=>{
 		setUser(null);
 		setToken(null);
 		localStorage.removeItem("token");
+		localStorage.removeItem("user");
 
 	}
 
