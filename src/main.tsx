@@ -10,9 +10,8 @@ import Register from './pages/Register.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <AuthProvider>
-            <BrowserRouter>
+        <BrowserRouter>
+            <AuthProvider>
                 <Routes>
                     <Route element={<MainLayout/>}>
                         <Route path="/" element={<Home />}></Route>
@@ -20,8 +19,7 @@ createRoot(document.getElementById('root')!).render(
                         <Route path="/register" element={<Register />}></Route>
                     </Route>
                 </Routes>
-            </BrowserRouter>
-        </AuthProvider>
-    </StrictMode>,
+            </AuthProvider>
+        </BrowserRouter>
 
 )
