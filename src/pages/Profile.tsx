@@ -1,33 +1,30 @@
+import { useEffect, useState } from "react";
+import ProfileAddresses from "../component/profile/ProfileAddresses";
+import ProfileInformation from "../component/profile/ProfileInformation";
 import { useAuth } from "../context/AuthContext";
+import axiosInstance from "../api/axiosInstance";
+import { Address, AddressResponse } from "../types/addresses";
 
 function Profile(){
     const {user} = useAuth();
+    const [addresses, setAddresses] = useState<Address[]>([]);
+
+    useEffect(()=>{
+        axiosInstance.get<AddressResponse>("/client/users/addresses")
+            .then((response) => {
+                if(!response.data.success){
+                    return;
+                }
+
+                setAddresses(response.data.data.addresses);
+            })
+    }, [])
+
     return (
-        <div className="space-y-12">
-            <div className=" border-gray-900/10 pb-12">
-                <h2 className="text-base/7 font-semibold text-gray-900">Personal Information</h2>
+        <div className="space-y-12 grid grid-cols-2 gap-x-8">
 
-                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                    <div className="sm:col-span-3">
-                        <label htmlFor="first-name" className="block text-sm/6 font-medium text-gray-900">
-                            Name
-                        </label>
-                        <div className="mt-2">
-                            {user?.name}
-                        </div>
-                    </div>
-
-                    <div className="sm:col-span-4">
-                        <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                            Email address
-                        </label>
-                        <div className="mt-2">
-                            {user?.email}
-
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ProfileInformation user={user!}/>
+            <ProfileAddresses addresses={addresses}/>
         </div>
       )
 }
