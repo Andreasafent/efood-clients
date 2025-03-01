@@ -10,15 +10,10 @@ import GoogleMap, { LatLngBounds } from "google-maps-react-markers";
 import { useCallback, useRef, useState } from "react";
 import Autocomplete from "react-google-autocomplete";
 import MapMarker from "./MapMarker";
+import ProfileAddressForm from "./ProfileAddressForm";
 
 type Props = {
     addresses: Address[];
-};
-
-const containerStyle = {
-    width: "100%",
-    height: "400px",
-    borderRadius: ".5rem",
 };
 
 const center = {
@@ -44,6 +39,10 @@ function ProfileAddresses({ addresses }: Props) {
             zoom: number;
         })=>{
         console.log(options);
+    }
+
+    const onSubmit = (data) =>{
+        console.log(data);
     }
 
     return (
@@ -89,8 +88,7 @@ function ProfileAddresses({ addresses }: Props) {
                                     >
                                         New Address
                                     </DialogTitle>
-                                    <div className="mt-2 hidden">
-                                        
+                                    <div className="mt-2 hidden">                                        
                                         <GoogleMap
                                             apiKey=""
                                             defaultCenter={center}
@@ -107,6 +105,9 @@ function ProfileAddresses({ addresses }: Props) {
                                                 draggable={true}
                                             ></MapMarker>
                                         </GoogleMap>
+                                    </div>
+                                    <div className="mt-2">
+                                        <ProfileAddressForm onSubmit={onSubmit}/>
                                     </div>
                                 </div>
                             </div>
