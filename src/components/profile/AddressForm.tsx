@@ -22,7 +22,7 @@ type Props = {
 };
 
 
-function ProfileAddressForm({onSubmit}:Props) {
+function AddressForm({onSubmit}:Props) {
     const [street, setStreet] = useState("");
     const [number, setNumber] = useState("");
     const [city, setCity] = useState("");
@@ -35,12 +35,9 @@ function ProfileAddressForm({onSubmit}:Props) {
 
     return (
         <div className=" text-left">
-            <h2 className="text-base/7 font-semibold text-gray-900">
-                Address Information
-            </h2>
 
-            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div className="col-span-4">
+            <div className="my-10 grid  gap-x-6 gap-y-8 grid-cols-1">
+                <div className="col-span-1 ">
                     <label
                         htmlFor="street-address"
                         className="block text-sm/6 font-medium text-gray-900"
@@ -59,7 +56,7 @@ function ProfileAddressForm({onSubmit}:Props) {
                         />
                     </div>
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1">
                     <label
                         htmlFor="street-address"
                         className="block text-sm/6 font-medium text-gray-900"
@@ -79,7 +76,7 @@ function ProfileAddressForm({onSubmit}:Props) {
                     </div>
                 </div>
 
-                <div className="sm:col-span-2 sm:col-start-1">
+                <div className="col-span-1">
                     <label
                         htmlFor="city"
                         className="block text-sm/6 font-medium text-gray-900"
@@ -99,12 +96,12 @@ function ProfileAddressForm({onSubmit}:Props) {
                     </div>
                 </div>
 
-                <div className="sm:col-span-2">
+                <div className="col-span-1">
                     <label
                         htmlFor="postal-code"
                         className="block text-sm/6 font-medium text-gray-900"
                     >
-                        ZIP / Postal code
+                        Postal
                     </label>
                     <div className="mt-2">
                         <input
@@ -192,7 +189,7 @@ function ProfileAddressForm({onSubmit}:Props) {
                     latitude,
                     longitude,
                 })}
-                className="inline-flex w-full justify-center btn btn-success mt-4"
+                className="inline-flex w-full justify-center btn btn-accent"
             >
                 Create address
             </button>
@@ -200,4 +197,4 @@ function ProfileAddressForm({onSubmit}:Props) {
     );
 }
 
-export default ProfileAddressForm;
+export default AddressForm;

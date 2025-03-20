@@ -10,7 +10,7 @@ import GoogleMap, { LatLngBounds } from "google-maps-react-markers";
 import { useCallback, useRef, useState } from "react";
 import Autocomplete from "react-google-autocomplete";
 import MapMarker from "./MapMarker";
-import ProfileAddressForm from "./ProfileAddressForm";
+import AddressForm from "./AddressForm";
 
 type Props = {
     addresses: Address[];
@@ -107,7 +107,7 @@ function ProfileAddresses({ addresses }: Props) {
                                         </GoogleMap>
                                     </div>
                                     <div className="mt-2">
-                                        <ProfileAddressForm onSubmit={onSubmit}/>
+                                        <AddressForm onSubmit={onSubmit}/>
                                     </div>
                                 </div>
                             </div>
