@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Address, AddressResponse } from "../../types/addresses";
+import { Address, AddressResponse, CreateAddressPayload, CreateAddressResponse } from "../../types/addresses";
 import axiosInstance from "../../api/axiosInstance";
 import { BuildingOffice2Icon, ChevronDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import AddressForm from "../profile/AddressForm";
+import AddressesList from "./AddressesList";
 
 function Addresses(){
     const localStorageAddress = localStorage.getItem("address");
     
-    const {user} = useAuth();
+    const [addressesLoading, setAddressesLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
     const [openAddresses, setOpenAddresses] = useState(false);
@@ -17,6 +19,7 @@ function Addresses(){
 
 
     useEffect(()=>{
+        setAddressesLoading(true);
         axiosInstance.get<AddressResponse>("/client/addresses")
             .then((response) => {
                 if(!response.data.success){
@@ -26,16 +29,48 @@ function Addresses(){
                 setAddresses(response.data.data.addresses);
                 
                 if(localStorageAddress) {
-                    const address = response.data.data.addresses.find(address => address.id === parseInt(localStorageAddress))!;
+                    const addressJson = JSON.parse(localStorageAddress) as Address;
+                    const address = response.data.data.addresses.find(address => address.id === addressJson.id)!;
                     if(address){
                         setSelectedAddress(address);
                     }
                 };
             })
+            .finally(()=>{
+                setAddressesLoading(false);
+            })
     }, []);
 
-    const onSubmit = (data) =>{
-        console.log(data);
+    const onSubmit = (data: CreateAddressPayload) =>{
+        setLoading(true);
+        axiosInstance.post<CreateAddressResponse>(
+            "/client/addresses",
+            {
+                ...data, 
+                postal_code: data.postalCode
+            }
+        )
+            .then((response)=>{
+                if(!response.data.success){
+                    return;
+                }
+
+                setAddresses([
+                    ...addresses,
+                    response.data.data.address
+                ])
+                setOpenCreateAddress(false);
+                setOpenAddresses(true);
+            })
+            .finally(()=>{
+                setLoading(false);
+            })
+    }
+
+    const onSelectAddress = (address: Address) => {
+        localStorage.setItem("address", JSON.stringify(address));
+        setSelectedAddress(address);
+        setOpenAddresses(false);
     }
 
     return (
@@ -47,8 +82,11 @@ function Addresses(){
                 <span>
                 {
                     selectedAddress
-                        ? selectedAddress.street
-                        : "No address selected..."
+                        ? <span>{selectedAddress.street} {selectedAddress.number}</span>
+                        : ( addressesLoading 
+                                ? <div className="skeleton h-4 w-28"></div>
+                                : "No address selected..."
+                        )
                 }
                 </span>
                 <ChevronDownIcon className="size-3"/>
@@ -85,10 +123,16 @@ function Addresses(){
                             </div>
                             <div className="">
                                 {
-                                    addresses?.length ? (
+                                    !addresses?.length ? (
                                         <div className="my-4 text-2xl text-center text-gray-400">No addresses yet...</div>
                                     ) : (
-                                        <></>
+                                        <div className="my-4">
+                                            <AddressesList 
+                                                addresses={addresses} 
+                                                selectedAddress={selectedAddress}
+                                                onSelectAddress={onSelectAddress}
+                                            />
+                                        </div>
                                     )
                                 }
                             </div>
@@ -119,7 +163,7 @@ function Addresses(){
                     <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                         <DialogPanel
                             transition
-                            className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 lg:max-w-[90%] data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                            className="relative min-w-[90%] transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 lg:max-w-[90%] data-closed:sm:translate-y-0 data-closed:sm:scale-95"
                         >
                             <div>
                                 <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-gray-100">
@@ -154,7 +198,7 @@ function Addresses(){
                                         </GoogleMap>
                                     </div> */}
                                     <div className="mt-2">
-                                        <AddressForm onSubmit={onSubmit}/>
+                                        <AddressForm onSubmit={onSubmit} loading={loading}/>
                                     </div>
                                 </div>
                             </div>

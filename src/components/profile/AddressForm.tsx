@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CreateAddressPayload } from "../../types/addresses";
 
 const center = {
     lat: 40.6449329,
@@ -6,23 +7,12 @@ const center = {
 };
 
 type Props = {
-    onSubmit: (data: {
-        street: string;
-        number?: string;
-        city?: string;
-        postalCode?: string;
-
-        latitude: number;
-        longitude: number;
-
-        phone?: string;
-        floor?: string;
-        door?: string;
-    }) => void;
+    onSubmit: (data: CreateAddressPayload) => void;
+    loading: boolean;
 };
 
 
-function AddressForm({onSubmit}:Props) {
+function AddressForm({ loading, onSubmit }:Props) {
     const [street, setStreet] = useState("");
     const [number, setNumber] = useState("");
     const [city, setCity] = useState("");
@@ -36,7 +26,7 @@ function AddressForm({onSubmit}:Props) {
     return (
         <div className=" text-left">
 
-            <div className="my-10 grid  gap-x-6 gap-y-8 grid-cols-1">
+            <div className="my-10 grid gap-x-6 gap-y-4 grid-cols-1">
                 <div className="col-span-1 ">
                     <label
                         htmlFor="street-address"
@@ -116,68 +106,67 @@ function AddressForm({onSubmit}:Props) {
                     </div>
                 </div>
 
-                <div className="col-span-full grid gap-x-6 gap-y-8 grid-cols-3">
-                    <div className="col-span-1">
-                        <label
-                            htmlFor="phone"
-                            className="block text-sm/6 font-medium text-gray-900"
-                        >
-                            Phone
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="phone"
-                                value={phone}
-                                onChange={(ev) => setPhone(ev.target.value)}
-                                name="phone"
-                                type="text"
-                                autoComplete="phone"
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                            />
-                        </div>
+                <div className="">
+                    <label
+                        htmlFor="phone"
+                        className="block text-sm/6 font-medium text-gray-900"
+                    >
+                        Phone
+                    </label>
+                    <div className="mt-2">
+                        <input
+                            id="phone"
+                            value={phone}
+                            onChange={(ev) => setPhone(ev.target.value)}
+                            name="phone"
+                            type="text"
+                            autoComplete="phone"
+                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        />
                     </div>
-                    <div className="col-span-1">
-                        <label
-                            htmlFor="floor"
-                            className="block text-sm/6 font-medium text-gray-900"
-                        >
-                            Floor
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="floor"
-                                value={floor}
-                                onChange={(ev) => setFloor(ev.target.value)}
-                                name="floor"
-                                type="text"
-                                autoComplete="floor"
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                            />
-                        </div>
+                </div>
+                <div className="">
+                    <label
+                        htmlFor="floor"
+                        className="block text-sm/6 font-medium text-gray-900"
+                    >
+                        Floor
+                    </label>
+                    <div className="mt-2">
+                        <input
+                            id="floor"
+                            value={floor}
+                            onChange={(ev) => setFloor(ev.target.value)}
+                            name="floor"
+                            type="text"
+                            autoComplete="floor"
+                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        />
                     </div>
-                    <div className="col-span-1">
-                        <label
-                            htmlFor="door"
-                            className="block text-sm/6 font-medium text-gray-900"
-                        >
-                            Door
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="door"
-                                value={door}
-                                onChange={(ev) => setDoor(ev.target.value)}
-                                name="door"
-                                type="text"
-                                autoComplete="door"
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                            />
-                        </div>
+                </div>
+                <div className="">
+                    <label
+                        htmlFor="door"
+                        className="block text-sm/6 font-medium text-gray-900"
+                    >
+                        Door
+                    </label>
+                    <div className="mt-2">
+                        <input
+                            id="door"
+                            value={door}
+                            onChange={(ev) => setDoor(ev.target.value)}
+                            name="door"
+                            type="text"
+                            autoComplete="door"
+                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        />
                     </div>
                 </div>
             </div>
             <button
                 type="button"
+                disabled={loading}
                 onClick={() => onSubmit({
                     street,
                     number,
@@ -191,7 +180,11 @@ function AddressForm({onSubmit}:Props) {
                 })}
                 className="inline-flex w-full justify-center btn btn-accent"
             >
-                Create address
+                {
+                    loading 
+                        ? <span className="loading loading-spinner"></span>
+                        : "Create Address"
+                }
             </button>
         </div>
     );

@@ -107,7 +107,7 @@ function ProfileAddresses({ addresses }: Props) {
                                         </GoogleMap>
                                     </div>
                                     <div className="mt-2">
-                                        <AddressForm onSubmit={onSubmit}/>
+                                        <AddressForm onSubmit={onSubmit} loading={false}/>
                                     </div>
                                 </div>
                             </div>
