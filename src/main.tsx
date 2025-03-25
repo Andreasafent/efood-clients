@@ -8,27 +8,40 @@ import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import Profile from './pages/Profile.tsx'
-import ProtectedRoute from './components/helper/ProtectedRoute.tsx'
+import AuthRoute from './components/helper/AuthRoute.tsx'
 import Stores from './pages/Stores.tsx'
+import NoAuthRoute from './components/helper/NoAuthRoute.tsx'
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
         <AuthProvider>
             <Routes>
                 <Route element={<MainLayout/>}>
-                    <Route path="/" element={<Home />}/>
+                    <Route path="/" element={
+                        <NoAuthRoute>
+                            <Home />
+                        </NoAuthRoute>                        
+                    }/>
                     {/* Auth */}
-                    <Route path="/login" element={<Login />}/>
-                    <Route path="/register" element={<Register />}/>
+                    <Route path="/login" element={
+                        <NoAuthRoute>
+                            <Login />
+                        </NoAuthRoute>
+                    }/>
+                    <Route path="/register" element={
+                        <NoAuthRoute>
+                            <Register />
+                        </NoAuthRoute>
+                    }/>
                     <Route path="/stores" element={
-                        <ProtectedRoute>
+                        <AuthRoute>
                             <Stores />
-                        </ProtectedRoute>
+                        </AuthRoute>
                     } />
                     <Route path="/profile" element={
-                        <ProtectedRoute>
+                        <AuthRoute>
                             <Profile />
-                        </ProtectedRoute>
+                        </AuthRoute>
                     } />
                 </Route>
             </Routes>

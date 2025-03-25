@@ -13,6 +13,9 @@ export type Store = {
     name:string;
     phone: string;
     working_hours: WorkingHour[];
+
+
+    shipping_price?: number; //Calculated for each user based on distance
 }
 
 export type WorkingHour = {
