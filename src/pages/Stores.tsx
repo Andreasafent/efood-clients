@@ -3,7 +3,7 @@ import axiosInstance from "../api/axiosInstance";
 import { CategoriesResponse, Category } from "../types/categories";
 import CategoriesList from "../components/stores/CategoriesList";
 import StoresList from "../components/stores/StoresList";
-import { Store } from "../types/stores";
+import { Store, StoresResponse } from "../types/stores";
 import StoresLayoutToggle from "../components/stores/StoresLayoutToggle";
 
 function Stores(){
@@ -21,7 +21,7 @@ function Stores(){
                 setCategories(response.data.data.categories);
             });
 
-        axiosInstance.get("/client/stores")
+        axiosInstance.get<StoresResponse>("/client/stores")
             .then((response)=>{
                 if(!response.data.success){
                     return;
@@ -35,7 +35,7 @@ function Stores(){
     };
 
     return (
-        <main>
+        <main className="p-6 bg-gray-50">
             <div className="">
                 <CategoriesList categories = {categories} />
             </div>

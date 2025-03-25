@@ -9,8 +9,8 @@ type Props = {
 function StoresList({ layout, stores }: Props) {
 
     const cardStores = (store: Store) => (
-        <Link to={"/stores/" + store.id}>
-            <div className="carf bg-base-100 w-full shadow-sm" key={store.id}>
+        <Link to={"/stores/" + store.id} key={store.id}>
+            <div className="carf bg-base-100 w-full shadow-sm" >
                 <figure className="relative">
                     <img
                         src={store.cover}

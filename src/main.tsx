@@ -11,6 +11,7 @@ import Profile from './pages/Profile.tsx'
 import AuthRoute from './components/helper/AuthRoute.tsx'
 import Stores from './pages/Stores.tsx'
 import NoAuthRoute from './components/helper/NoAuthRoute.tsx'
+import Store from './pages/Store.tsx'
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
@@ -36,6 +37,11 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/stores" element={
                         <AuthRoute>
                             <Stores />
+                        </AuthRoute>
+                    } />
+                    <Route path="/stores/:id" element={
+                        <AuthRoute>
+                            <Store />
                         </AuthRoute>
                     } />
                     <Route path="/profile" element={

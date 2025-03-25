@@ -1,4 +1,6 @@
 import { Category } from "./categories";
+import { BaseResponse } from "./helpers";
+import { ProductCategory } from "./products";
 
 export type Store = {
     id: number;
@@ -14,11 +16,18 @@ export type Store = {
     phone: string;
     working_hours: WorkingHour[];
 
-
     shipping_price?: number; //Calculated for each user based on distance
+    product_categories?: ProductCategory[];
 }
 
 export type WorkingHour = {
     start: string;
     end: string;
 }
+
+export type StoresResponse = BaseResponse<{
+    stores: Store[];
+}>
+export type StoreResponse = BaseResponse<{
+    store: Store;
+}>
