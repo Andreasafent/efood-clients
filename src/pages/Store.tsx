@@ -3,7 +3,20 @@ import { Link, useParams } from "react-router";
 import { StoreResponse, Store as StoreType } from "../types/stores";
 import axiosInstance from "../api/axiosInstance";
 import { ProductCategory } from "../types/products";
-import { ChevronLeftIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
+import GoogleMap from "google-maps-react-markers";
+import MapMarker from "../components/profile/MapMarker";
+
+const days = [
+    "Monday", 
+    "Tuesday", 
+    "Wednesday", 
+    "Thursday", 
+    "Friday", 
+    "Saturday", 
+    "Sunday"
+];
 
 function Store() {
     const params = useParams();
@@ -12,8 +25,8 @@ function Store() {
     const [showBanner, setShowBanner] = useState(false);
     const [showStoreName, setShowStoreName] = useState(false);
     const [showCategories, setShowCategories] = useState(false);
+    const [openInformation, setOpenInformation] = useState(false);
 
-    
 
     useEffect(() => {
         const id = params.id;
@@ -43,9 +56,9 @@ function Store() {
 
     const scrollToCategory = (category: ProductCategory) => {
         const scrollTop = document.getElementById("category-" + category.id)?.offsetTop || 0;
-        window.scrollTo({top: scrollTop - 70, behavior:'smooth'});
+        window.scrollTo({ top: scrollTop - 70, behavior: 'smooth' });
     }
-    
+
     return (
         <main className="">
             <div
@@ -54,40 +67,43 @@ function Store() {
                     backgroundImage: `url(${store?.cover})`,
                 }}
             >
-                <div className="flex justify-between items-center absolute p-4 w-full" style={{top: 0}}>
+                <div className="flex justify-between items-center absolute p-4 w-full" style={{ top: 0 }}>
                     <Link to={"/stores"}>
                         <button className="btn btn-circle size-8"                        >
-                            <ChevronLeftIcon className="size-4"/>
+                            <ChevronLeftIcon className="size-4" />
                         </button>
                     </Link>
-                    <button className="btn btn-circle size-8"                        >
-                        <InformationCircleIcon className="size-4"/>
+                    <button
+                        className="btn btn-circle size-8"
+                        onClick={() => setOpenInformation(true)}
+                    >
+                        <InformationCircleIcon className="size-4" />
                     </button>
                 </div>
             </div>
 
             {
-                showBanner && 
-                <div className="h-[64px] fixed p-3 w-full shadow-md shadow-gray-400 bg-white z-1" style={{top:0}}>
+                showBanner &&
+                <div className="h-[64px] fixed p-3 w-full shadow-md shadow-gray-400 bg-white z-1" style={{ top: 0 }}>
                     {
-                        showStoreName&&
+                        showStoreName &&
                         <div className="h-full flex justify-center items-center font-bold text-xl">{store?.name}</div>
                     }
                     {
-                        showCategories && 
-                            <div className="flex flex-row gap-3 items-center overflow-x-auto">
-                                { 
-                                    store?.product_categories?.map(category =>(
-                                        <button 
-                                            className="btn btn-ghost" 
-                                            key={category.id}
-                                            onClick={() => scrollToCategory(category)}
-                                        >
-                                                {category.name}
-                                        </button>
-                                    ))
-                                }
-                            </div>
+                        showCategories &&
+                        <div className="flex flex-row gap-3 items-center overflow-x-auto">
+                            {
+                                store?.product_categories?.map(category => (
+                                    <button
+                                        className="btn btn-ghost"
+                                        key={category.id}
+                                        onClick={() => scrollToCategory(category)}
+                                    >
+                                        {category.name}
+                                    </button>
+                                ))
+                            }
+                        </div>
                     }
                 </div>
             }
@@ -146,6 +162,78 @@ function Store() {
                     }
                 </div>
             </section>
+
+            <Dialog open={openInformation} onClose={setOpenInformation} className="relative z-10">
+                <DialogBackdrop
+                    transition
+                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                />
+
+                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                        <DialogPanel
+                            transition
+                            className="relative min-w-[90%] transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 lg:max-w-[90%] data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                        >
+                            <div className="flex justify-end">
+                                <button
+                                    className="btn btn-circle size-8"
+                                    onClick={() => setOpenInformation(false)}
+                                >
+                                    <XMarkIcon className="size-4" />
+                                </button>
+                            </div>
+                            <div className="">
+                                <h2 className="font-bold text-md">
+                                    Store Address
+                                </h2>
+                                <p className="text-gray-400">
+                                    {store?.address}
+                                </p>
+                                <div className="">
+                                    {
+                                        openInformation && store && 
+                                        <GoogleMap
+                                            apiKey=""
+                                            defaultCenter={{
+                                                lat: +store?.latitude,
+                                                lng: +store?.longitude,
+                                            }}
+                                            defaultZoom={5}
+                                            options={{}}
+                                            mapMinHeight="400px"
+                                        >
+                                            <MapMarker
+                                                lat={store?.latitude}
+                                                lng={store?.longitude}
+                                                markerId={"address-location"}
+                                            ></MapMarker>
+                                        </GoogleMap>
+                                    }
+                                </div>
+                                {
+                                    store?.working_hours?.length &&
+                                    <>
+                                        <h2 className="font-bold text-md mt-4">
+                                            Working Hours
+                                        </h2>
+                                        <ul className="divide-y divide-gray-200">
+                                            {
+                                                store?.working_hours.map((wh, index)=>(
+                                                    <li key={index} className="py-3 flex items-center justify-between">
+                                                        <div className="font-bold text-sm">{days[index]}</div>
+                                                        <div className="text-gray-500 text-sm">{wh.start}- {wh.end}</div>
+                                                    </li>
+                                                ))
+                                            }
+                                        </ul>
+                                    </>
+                                }
+                            </div>
+                        </DialogPanel>
+                    </div>
+                </div>
+            </Dialog>
         </main>
     );
 }
