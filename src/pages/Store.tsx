@@ -315,66 +315,30 @@ function Store() {
                         <div className="flex h-full items-end justify-center text-center sm:items-center sm:p-0">
                             <DialogPanel
                                 transition
-                                className="relative h-full w-full transform overflow-hidden bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
-                            >   
-                                <div className="hero relative h-[300px]">
-                                    
-                                </div>
-                                <div className="flex justify-end">
-                                    <button
-                                        className="btn btn-circle size-8"
-                                        onClick={() => setOpenProduct(false)}
-                                    >
-                                        <XMarkIcon className="size-4" />
-                                    </button>
-                                </div>
-                                <div className="">
-                                    <h2 className="font-bold text-md">
-                                        Store Address
-                                    </h2>
-                                    <p className="text-gray-400">
-                                        {store?.address}
-                                    </p>
-                                    <div className="">
-                                        {
-                                            openInformation && store &&
-                                            <GoogleMap
-                                                apiKey=""
-                                                defaultCenter={{
-                                                    lat: +store?.latitude,
-                                                    lng: +store?.longitude,
-                                                }}
-                                                defaultZoom={5}
-                                                options={{}}
-                                                mapMinHeight="400px"
-                                            >
-                                                <MapMarker
-                                                    lat={store?.latitude}
-                                                    lng={store?.longitude}
-                                                    markerId={"address-location"}
-                                                ></MapMarker>
-                                            </GoogleMap>
-                                        }
+                                className="relative h-full w-full transform overflow-hidden bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                            >
+                                <div
+                                    className="hero relative h-[300px]"
+                                    style={{
+                                        backgroundImage: `url(${selectedProduct?.main_image})`,
+                                    }}
+                                >
+                                    <div className="flex justify-end items-center absolute p-4 w-full" style={{ top: 0 }}>
+                                        <button
+                                            className="btn btn-circle size-8"
+                                            onClick={() => setOpenProduct(false)}
+                                        >
+                                            <XMarkIcon className="size-4" />
+                                        </button>
                                     </div>
-                                    {
-                                        store?.working_hours?.length &&
-                                        <>
-                                            <h2 className="font-bold text-md mt-4">
-                                                Working Hours
-                                            </h2>
-                                            <ul className="divide-y divide-gray-200">
-                                                {
-                                                    store?.working_hours.map((wh, index) => (
-                                                        <li key={index} className="py-3 flex items-center justify-between">
-                                                            <div className="font-bold text-sm">{days[index]}</div>
-                                                            <div className="text-gray-500 text-sm">{wh.start}- {wh.end}</div>
-                                                        </li>
-                                                    ))
-                                                }
-                                            </ul>
-                                        </>
-                                    }
                                 </div>
+
+                                <div className="bg-white rounded-b-2xl p-4 shadow-lg">
+                                    <h2 className="font-bold text-lg mb-2">{selectedProduct?.name}</h2>
+                                    <p className="text-gray-500 text-xs mb-5">{selectedProduct?.description}</p>
+                                    <div className="font-bold text-lg">{selectedProduct?.price.toFixed(2)}€</div>
+                                </div>
+
                             </DialogPanel>
                         </div>
                     </div>
