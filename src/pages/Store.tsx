@@ -20,6 +20,7 @@ import GoogleMap from "google-maps-react-markers";
 import MapMarker from "../components/profile/MapMarker";
 import { useCartStore } from "../context/CartStore";
 import StoreProduct from "../components/stores/StoreProduct";
+import { ProductQuantityControls } from "../components/stores/ProductQuantityControls";
 
 const days = [
     "Monday",
@@ -33,7 +34,7 @@ const days = [
 
 function Store() {
     const params = useParams();
-    const items = useCartStore(state => state.items);
+    const stores = useCartStore(state => state.stores);
     const addItem = useCartStore(state => state.addItem);
 
     const [loading, setLoading] = useState(true);
@@ -85,12 +86,12 @@ function Store() {
         setOpenProduct(true);
         setSelectedProduct(product);
 
-        const productInCart = items.find(item => item.product.id === product.id)
+        const productInCart = stores[store!.id].products.find(item => item.product.id === product.id)
         setProductQuantity(productInCart?.quantity ?? 1);
     };
 
     const addToCart = () => {
-        addItem(selectedProduct!, productQuantity);
+        addItem(store!.id, selectedProduct!, productQuantity);
         setOpenProduct(false);
     };
 
@@ -221,6 +222,7 @@ function Store() {
                                     className={"pb-4" + (index !== array.length - 1 ? "border-b border-gray-200" : "" )}
                                 >
                                     <StoreProduct
+                                        store={store!}
                                         product={product}
                                         onSelectProduct={onSelectProduct}
                                     />
@@ -369,25 +371,11 @@ function Store() {
                                 </fieldset>
                             </div>
                             <div className="bg-white p-4 shadow-lg flex justify-between gap-10">
-                                <div className="flex justify-between items-center gap-3">
-                                    <button
-                                        disabled={productQuantity === 0}
-                                        className="btn btn-square btn-sm"
-                                        onClick={() => setProductQuantity(prev => prev > 0 ? prev - 1 : 0)}
-                                    >
-                                        <MinusIcon className="size-6" />
-                                    </button>
-
-                                    <span className="font-bold text-lg w-[25px] text-center">{productQuantity}</span>
-
-                                    <button
-                                        className="btn btn-square btn-sm"
-                                        onClick={() => setProductQuantity(prev => prev + 1)}
-
-                                    >
-                                        <PlusIcon className="size-6" />
-                                    </button>
-                                </div>
+                                <ProductQuantityControls
+                                    quantity={productQuantity}
+                                    onDecreaseQuantity={() => setProductQuantity(prev => prev > 0 ? prev - 1 : 0)}
+                                    onIncreaseQuantity={() => setProductQuantity(prev => prev + 1)}
+                                />
                                 <div className="grow">
                                     <button
                                         className="btn btn-md btn-success btn-block text-white"

@@ -1,30 +1,103 @@
 import { create } from 'zustand'
 import { Product } from '../types/products'
+import { persist } from 'zustand/middleware'
+import { Store } from '../types/stores'
 
-type CartStore = {
-    items: {
-        product: Product
-        quantity: number
-    }[];
-    addItem: (product: Product, quantity: number) => void
+type CartProduct = {
+    product: Product
+    quantity: number
 }
 
-export const useCartStore = create<CartStore>((set) => ({
-    items: [],
-    addItem: (product: Product, quantity: number) => set((state)=>{
-        const item = state.items.find(i => i.product.id === product.id);
+type CartStore = {
+    stores: Record<number, {
+        products: CartProduct[]
+    }>
+    selectStore: (storeId: number) => Record<number,
+        {
+            products: CartProduct[];
+        }>,
 
-        if(item){
-            item.quantity = quantity;
-            return state;
-        }else{
-            state.items.push({
-                product, 
-                quantity
-            })
+    selectProduct: (storeId: number, productId: number) => CartProduct | undefined;
+
+    addItem: (storeId: number, product: Product, quantity: number) => void;
+    removeItem: (storeId: number, product: Product) => void;
+    increaseQuantity: (storeId: number, product: Product, by?: number) => void;
+    decreaseQuantity: (storeId: number, product: Product, by?: number) => void;
+
+}
+
+export const useCartStore = create(
+    persist<CartStore>(
+        (set, get) => ({
+            stores: {},
+            selectStore: (storeId: number) => {
+                return get().stores?.[storeId];
+            },
+            selectProduct: (storeId: number, productId: number) => {
+                return get().stores?.[storeId]?.products.find(p => p.product.id === productId);
+            },
+            addItem: (storeId: number, product: Product, quantity: number) => set((state) => {
+
+                let store = get().stores[storeId];
+
+                if (!store) {
+                    get().stores[storeId] = {
+                        products: []
+                    }
+                    store = get().stores[storeId];
+                }
+
+
+                const productInCart = store.products.find(i => i.product.id === product.id);
+
+                if (productInCart) {
+                    productInCart.quantity = quantity;
+                    return state;
+                } else {
+                    store.products.push({
+                        product,
+                        quantity
+                    })
+                }
+                return state;
+            }),
+            removeItem: (storeId: number, product: Product) => set((state) => {
+                if (!state.selectProduct(storeId, product.id)) { return state; }
+
+                get().stores[storeId].products = get().stores[storeId].products.filter(p => p.product.id !== product.id);
+
+                return { ...state };
+
+
+            }),
+            increaseQuantity: (storeId: number, product: Product, by: number = 1) => set((state) => {
+                const productInCart = state.selectProduct(storeId, product.id);
+
+                if (!productInCart) { return state; }
+
+                productInCart.quantity += by;
+
+
+                return { ...state };
+            }),
+            decreaseQuantity: (storeId: number, product: Product, by: number = 1) => set((state) => {
+                const productInCart = state.selectProduct(storeId, product.id);
+
+                if (!productInCart) { return state; }
+
+                productInCart.quantity -= by;
+
+                if (productInCart.quantity === 0) {
+                    state.removeItem(storeId, product);
+                }
+
+
+                return { ...state };
+            }),
+        }),
+        {
+            name: "cart"
         }
-        console.log(state.items)
-        return state;
-    })
-}))
+    )
+)
 
