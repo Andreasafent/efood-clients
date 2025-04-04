@@ -34,7 +34,9 @@ const days = [
 
 function Store() {
     const params = useParams();
-    const stores = useCartStore(state => state.stores);
+
+    const stores = useCartStore(state=>state.stores);
+    const cartProducts = useCartStore(state => state.selectStore(+params.id!)?.products);
     const addItem = useCartStore(state => state.addItem);
 
     const [loading, setLoading] = useState(true);
@@ -42,9 +44,11 @@ function Store() {
     const [showBanner, setShowBanner] = useState(false);
     const [showStoreName, setShowStoreName] = useState(false);
     const [showCategories, setShowCategories] = useState(false);
-    const [openInformation, setOpenInformation] = useState(false);
 
+    const [openInformation, setOpenInformation] = useState(false);
     const [openProduct, setOpenProduct] = useState(false);
+    const [openCartSummary, setOpenCartSummary] = useState(false);
+
     const [selectedProduct, setSelectedProduct] = useState<Product | null>();
     const [productQuantity, setProductQuantity] = useState(0);
 
@@ -86,8 +90,8 @@ function Store() {
         setOpenProduct(true);
         setSelectedProduct(product);
 
-        const productInCart = stores[store!.id].products.find(item => item.product.id === product.id)
-        setProductQuantity(productInCart?.quantity ?? 1);
+        // const productInCart = stores[store!.id].products.find(item => item.product.id === product.id)
+        setProductQuantity(1);
     };
 
     const addToCart = () => {
@@ -210,7 +214,7 @@ function Store() {
                     <span>•</span>
                     <span>Delivery {store?.shipping_price}€</span>
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 pb-14">
                     {store?.product_categories?.map((category) => (
                         <div key={category.id} id={"category-" + category.id}>
                             <h2 className="font-bold text-lg pb-4 border-b border-black">
@@ -219,7 +223,7 @@ function Store() {
                             {category.products?.map((product, index, array) => (
                                 <div
                                     key={product.id}
-                                    className={"pb-4" + (index !== array.length - 1 ? "border-b border-gray-200" : "" )}
+                                    className={"pb-4" + (index !== array.length - 1 ? "border-b border-gray-200" : "")}
                                 >
                                     <StoreProduct
                                         store={store!}
@@ -231,7 +235,38 @@ function Store() {
                         </div>
                     ))}
                 </div>
+
             </section>
+            {
+                cartProducts?.length > 0 && (
+                    <div className="fixed p-3 w-full bg-white z-1" style={{ bottom: 0, left: 0 }}>
+                        <Link to={"/stores/" + store?.id + "/checkout"}>
+                            <button
+                                className="btn btn-lg btn-success btn-block text-white p-2 grid grid-cols-3"
+                                onClick={() => addToCart()}
+                            >
+                                <div className="col-span-1 text-start">
+                                    <span className="inline-block p-1 min-w-[28px] font-bold text-black text-center rounded-lg bg-white text-sm">
+                                        {
+                                            cartProducts.reduce((total, product) => {
+                                                return total + product.quantity;
+                                            }, 0)
+                                        }
+                                    </span>
+                                </div>
+                                <div className="col-span-1 font-bold text-lg text-black text-center">Cart</div>
+                                <div className="col-span-1 font-bold text-black text-end">
+                                    {
+                                        cartProducts.reduce((total, product) => {
+                                            return total + (product.quantity * product.product.price);
+                                        }, 0)
+                                    }€
+                                </div>
+                            </button>
+                        </Link>
+                    </div>
+                )
+            }
 
             <Dialog
                 open={openInformation}
@@ -313,6 +348,7 @@ function Store() {
                     </div>
                 </div>
             </Dialog>
+
             <Dialog
                 open={openProduct}
                 onClose={setOpenProduct}
@@ -373,7 +409,7 @@ function Store() {
                             <div className="bg-white p-4 shadow-lg flex justify-between gap-10">
                                 <ProductQuantityControls
                                     quantity={productQuantity}
-                                    onDecreaseQuantity={() => setProductQuantity(prev => prev > 0 ? prev - 1 : 0)}
+                                    onDecreaseQuantity={() => setProductQuantity(prev => prev > 1 ? prev - 1 : 1)}
                                     onIncreaseQuantity={() => setProductQuantity(prev => prev + 1)}
                                 />
                                 <div className="grow">
@@ -389,6 +425,7 @@ function Store() {
                     </div>
                 </div>
             </Dialog>
+
         </main>
     );
 }

@@ -12,12 +12,12 @@ type CartStore = {
     stores: Record<number, {
         products: CartProduct[]
     }>
-    selectStore: (storeId: number) => Record<number,
-        {
-            products: CartProduct[];
-        }>,
+    selectStore: (storeId: number) => {
+        products: CartProduct[];
+    },
 
     selectProduct: (storeId: number, productId: number) => CartProduct | undefined;
+    removeStore: (storeId: number) => void;
 
     addItem: (storeId: number, product: Product, quantity: number) => void;
     removeItem: (storeId: number, product: Product) => void;
@@ -36,61 +36,84 @@ export const useCartStore = create(
             selectProduct: (storeId: number, productId: number) => {
                 return get().stores?.[storeId]?.products.find(p => p.product.id === productId);
             },
+
+            removeStore: (storeId: number) =>set((state)=>{
+                delete state.stores[storeId];
+                return {...state };
+            }),
+
             addItem: (storeId: number, product: Product, quantity: number) => set((state) => {
+                const stores = state.stores;
 
-                let store = get().stores[storeId];
-
-                if (!store) {
-                    get().stores[storeId] = {
+                if (!stores[storeId]) {
+                    stores[storeId] = {
                         products: []
-                    }
-                    store = get().stores[storeId];
+                    };
                 }
 
-
-                const productInCart = store.products.find(i => i.product.id === product.id);
-
-                if (productInCart) {
-                    productInCart.quantity = quantity;
-                    return state;
+                const productIndex = stores[storeId].products.findIndex(i => i.product.id === product.id);
+        
+                if (productIndex !== -1) {
+                    stores[storeId].products[productIndex].quantity += quantity;
+                    stores[storeId].products = [...stores[storeId].products];
                 } else {
-                    store.products.push({
-                        product,
-                        quantity
-                    })
+                    stores[storeId].products = [
+                        ...stores[storeId].products,
+                        {
+                            product,
+                            quantity
+                        }
+                    ];
                 }
-                return state;
+        
+                state.stores = stores;
+
+                return {...state};
             }),
             removeItem: (storeId: number, product: Product) => set((state) => {
                 if (!state.selectProduct(storeId, product.id)) { return state; }
+                const stores = state.stores;
 
-                get().stores[storeId].products = get().stores[storeId].products.filter(p => p.product.id !== product.id);
+                stores[storeId].products = stores[storeId].products.filter(p => p.product.id !== product.id);
 
-                return { ...state };
+                if (stores[storeId].products.length === 0) {
+                    get().removeStore(storeId);
+                    return {...state};
+                }
 
-
+                state.stores = stores;
+                return {...state};
             }),
             increaseQuantity: (storeId: number, product: Product, by: number = 1) => set((state) => {
                 const productInCart = state.selectProduct(storeId, product.id);
-
                 if (!productInCart) { return state; }
 
-                productInCart.quantity += by;
+                const stores = state.stores;
 
+                const productIndex = stores[storeId].products.findIndex(i => i.product.id === product.id);
+                stores[storeId].products[productIndex].quantity += by;
+                stores[storeId].products = [...stores[storeId].products];
+                state.stores = stores;
 
                 return { ...state };
             }),
             decreaseQuantity: (storeId: number, product: Product, by: number = 1) => set((state) => {
                 const productInCart = state.selectProduct(storeId, product.id);
-
                 if (!productInCart) { return state; }
 
-                productInCart.quantity -= by;
+                const stores = state.stores;
 
-                if (productInCart.quantity === 0) {
-                    state.removeItem(storeId, product);
+                const productIndex = stores[storeId].products.findIndex(i => i.product.id === product.id);
+                stores[storeId].products[productIndex].quantity -= by;
+
+                if (stores[storeId].products[productIndex].quantity === 0) {
+                    get().removeItem(storeId, stores[storeId].products[productIndex].product);
+                    return { ...state };
                 }
 
+                stores[storeId].products = [...stores[storeId].products];
+
+                state.stores = stores;
 
                 return { ...state };
             }),
