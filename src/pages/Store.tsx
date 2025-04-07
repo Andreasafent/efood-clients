@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { StoreResponse, Store as StoreType } from "../types/stores";
+import { ShippingMethods, StoreResponse, Store as StoreType } from "../types/stores";
 import axiosInstance from "../api/axiosInstance";
 import { Product, ProductCategory } from "../types/products";
 import {
+    ChevronDownIcon,
     ChevronLeftIcon,
     InformationCircleIcon,
     MinusIcon,
@@ -35,9 +36,11 @@ const days = [
 function Store() {
     const params = useParams();
 
-    const stores = useCartStore(state=>state.stores);
+    const stores = useCartStore(state => state.stores);
     const cartProducts = useCartStore(state => state.selectStore(+params.id!)?.products);
+    const shippingMethod = useCartStore(state => state.selectStore(+params.id!)?.shippingMethod);
     const addItem = useCartStore(state => state.addItem);
+    const updateShippingMethod = useCartStore(state => state.updateShippingMethod);
 
     const [loading, setLoading] = useState(true);
     const [store, setStore] = useState<StoreType | null>();
@@ -48,6 +51,7 @@ function Store() {
     const [openInformation, setOpenInformation] = useState(false);
     const [openProduct, setOpenProduct] = useState(false);
     const [openCartSummary, setOpenCartSummary] = useState(false);
+    const [openShippingMethod, setOpenShippingMethod] = useState(false);
 
     const [selectedProduct, setSelectedProduct] = useState<Product | null>();
     const [productQuantity, setProductQuantity] = useState(0);
@@ -240,30 +244,28 @@ function Store() {
             {
                 cartProducts?.length > 0 && (
                     <div className="fixed p-3 w-full bg-white z-1" style={{ bottom: 0, left: 0 }}>
-                        <Link to={"/stores/" + store?.id + "/checkout"}>
-                            <button
-                                className="btn btn-lg btn-success btn-block text-white p-2 grid grid-cols-3"
-                                onClick={() => addToCart()}
-                            >
-                                <div className="col-span-1 text-start">
-                                    <span className="inline-block p-1 min-w-[28px] font-bold text-black text-center rounded-lg bg-white text-sm">
-                                        {
-                                            cartProducts.reduce((total, product) => {
-                                                return total + product.quantity;
-                                            }, 0)
-                                        }
-                                    </span>
-                                </div>
-                                <div className="col-span-1 font-bold text-lg text-black text-center">Cart</div>
-                                <div className="col-span-1 font-bold text-black text-end">
+                        <button
+                            className="btn btn-lg btn-success btn-block text-white p-2 grid grid-cols-3"
+                            onClick={() => setOpenCartSummary(true)}
+                        >
+                            <div className="col-span-1 text-start">
+                                <span className="inline-block p-1 min-w-[28px] font-bold text-black text-center rounded-lg bg-white text-sm">
                                     {
                                         cartProducts.reduce((total, product) => {
-                                            return total + (product.quantity * product.product.price);
+                                            return total + product.quantity;
                                         }, 0)
-                                    }€
-                                </div>
-                            </button>
-                        </Link>
+                                    }
+                                </span>
+                            </div>
+                            <div className="col-span-1 font-bold text-lg text-black text-center">Cart</div>
+                            <div className="col-span-1 font-bold text-black text-end">
+                                {
+                                    cartProducts.reduce((total, product) => {
+                                        return total + (product.quantity * product.product.price);
+                                    }, 0)
+                                }€
+                            </div>
+                        </button>
                     </div>
                 )
             }
@@ -420,6 +422,137 @@ function Store() {
                                         Add to cart
                                     </button>
                                 </div>
+                            </div>
+                        </DialogPanel>
+                    </div>
+                </div>
+            </Dialog>
+
+            <Dialog
+                open={openCartSummary}
+                onClose={setOpenCartSummary}
+                className="relative z-10"
+            >
+                <DialogBackdrop
+                    transition
+                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                />
+
+                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div className="flex min-h-full h-full items-end justify-center text-center sm:items-center sm:p-0">
+                        <DialogPanel
+                            transition
+                            className="relative bg-gray-50 min-h-full h-full w-full transform text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                        >
+                            <div
+                                className="flex justify-start items-center p-4 w-full"
+                                style={{ top: 0 }}
+                            >
+                                <button
+                                    className="btn btn-circle size-8"
+                                    onClick={() => setOpenCartSummary(false)}
+                                >
+                                    <ChevronLeftIcon className="size-4" />
+                                </button>
+                            </div>
+                            <div className="p-4">
+                                <h1 className="font-bold text-2xl">Cart</h1>
+                                <a
+                                    href="javascript:void(0)"
+                                    className="flex items-center gap-2"
+                                    onClick={() => setOpenShippingMethod(true)}
+                                >
+                                    <span className="text-xs capitalize">{shippingMethod}: 10' - 20'</span>
+                                    <ChevronDownIcon className="size-3" />
+                                </a>
+
+                            </div>
+                            {/* <Link to={"/stores/" + store?.id + "/checkout"}>
+                                <button
+                                    className="btn btn-lg btn-success btn-block text-white p-2 grid grid-cols-3"
+                                    onClick={() => setOpenCartSummary(true)}
+                                >
+                                    <div className="col-span-1 text-start">
+                                        <span className="inline-block p-1 min-w-[28px] font-bold text-black text-center rounded-lg bg-white text-sm">
+                                            {
+                                                cartProducts.reduce((total, product) => {
+                                                    return total + product.quantity;
+                                                }, 0)
+                                            }
+                                        </span>
+                                    </div>
+                                    <div className="col-span-1 font-bold text-lg text-black text-center">Cart</div>
+                                    <div className="col-span-1 font-bold text-black text-end">
+                                        {
+                                            cartProducts.reduce((total, product) => {
+                                                return total + (product.quantity * product.product.price);
+                                            }, 0)
+                                        }€
+                                    </div>
+                                </button>
+                            </Link> */}
+                        </DialogPanel>
+                    </div>
+                </div>
+            </Dialog>
+
+            <Dialog
+                open={openShippingMethod}
+                onClose={setOpenShippingMethod}
+                className="relative z-10"
+            >
+                <DialogBackdrop
+                    transition
+                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                />
+
+                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div className="flex min-h-full items-end justify-center text-center sm:items-center sm:p-0">
+                        <DialogPanel
+                            transition
+                            className="relative w-full min-w-full transform overflow-hidden rounded-t-xl bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8  sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                        >
+                            <div
+                                className="flex justify-start items-center p-4 w-full"
+                                style={{ top: 0 }}
+                            >
+                                <button
+                                    className="btn btn-circle size-8"
+                                    onClick={() => setOpenShippingMethod(false)}
+                                >
+                                    <ChevronLeftIcon className="size-4" />
+                                </button>
+                            </div>
+                            <div className="p-4">
+                                <fieldset>
+                                    <h1 className="font-bold text-2xl">Shipping Method</h1>
+                                    <p className="text-gray-500">Please select how you want to recieve your order</p>
+                                    <div className="mt-6 space-y-4">
+                                        {
+                                             (["delivery", "takeaway"] as ShippingMethods[]).map((sm, index, array) => {
+                                                return (
+                                                    <div
+                                                        key={sm}
+                                                        className={"flex items-center" + (index!==array.length -1 ? "border-b border-gray-200 pb-4" : "")}
+                                                    >
+                                                        <input
+                                                            defaultChecked={stores[store!.id].shippingMethod === sm}
+                                                            id={"shipping-method-" + sm}
+                                                            name="shipping-method"
+                                                            type="radio"
+                                                            value={sm}
+                                                            className="radio radio-success"
+                                                            onChange={() => updateShippingMethod(store!.id, sm)}
+                                                        />
+                                                        <label htmlFor={"shipping-method-" + sm} className="capitalize ml-3 block text-sm/6 font-medium text-gray-900">
+                                                            {sm}
+                                                        </label>
+                                                    </div>
+                                                )
+                                            })
+                                        }
+                                    </div>
+                                </fieldset>
                             </div>
                         </DialogPanel>
                     </div>
