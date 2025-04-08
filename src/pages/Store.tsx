@@ -17,30 +17,23 @@ import {
     DialogPanel,
     DialogTitle,
 } from "@headlessui/react";
-import GoogleMap from "google-maps-react-markers";
-import MapMarker from "../components/profile/MapMarker";
 import { useCartStore } from "../context/CartStore";
 import StoreProduct from "../components/stores/StoreProduct";
 import { ProductQuantityControls } from "../components/stores/ProductQuantityControls";
+import { StoreInformationDialog } from "../components/stores/StoreInformationDialog";
+import { StoreProductDialog } from "../components/stores/StoreProductDialog";
+import { StoreCartSummaryDialog } from "../components/stores/StoreCartSummaryDialog";
+import { StoreShippingMethodDialog } from "../components/stores/StoreShippingMethodDialog";
 
-const days = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-];
+
 
 function Store() {
     const params = useParams();
 
     const stores = useCartStore(state => state.stores);
     const cartProducts = useCartStore(state => state.selectStore(+params.id!)?.products);
-    const shippingMethod = useCartStore(state => state.selectStore(+params.id!)?.shippingMethod);
+
     const addItem = useCartStore(state => state.addItem);
-    const updateShippingMethod = useCartStore(state => state.updateShippingMethod);
 
     const [loading, setLoading] = useState(true);
     const [store, setStore] = useState<StoreType | null>();
@@ -53,7 +46,7 @@ function Store() {
     const [openCartSummary, setOpenCartSummary] = useState(false);
     const [openShippingMethod, setOpenShippingMethod] = useState(false);
 
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>();
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [productQuantity, setProductQuantity] = useState(0);
 
     useEffect(() => {
@@ -94,14 +87,9 @@ function Store() {
         setOpenProduct(true);
         setSelectedProduct(product);
 
-        // const productInCart = stores[store!.id].products.find(item => item.product.id === product.id)
         setProductQuantity(1);
     };
 
-    const addToCart = () => {
-        addItem(store!.id, selectedProduct!, productQuantity);
-        setOpenProduct(false);
-    };
 
     const skeleton = (
         <div className="">
@@ -269,295 +257,40 @@ function Store() {
                     </div>
                 )
             }
-
-            <Dialog
+            <StoreInformationDialog
                 open={openInformation}
-                onClose={setOpenInformation}
-                className="relative z-10"
-            >
-                <DialogBackdrop
-                    transition
-                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
-                />
-
-                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                        <DialogPanel
-                            transition
-                            className="relative min-w-[90%] transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 lg:max-w-[90%] data-closed:sm:translate-y-0 data-closed:sm:scale-95"
-                        >
-                            <div className="flex justify-end">
-                                <button
-                                    className="btn btn-circle size-8"
-                                    onClick={() => setOpenInformation(false)}
-                                >
-                                    <XMarkIcon className="size-4" />
-                                </button>
-                            </div>
-                            <div className="">
-                                <h2 className="font-bold text-md">
-                                    Store Address
-                                </h2>
-                                <p className="text-gray-400">
-                                    {store?.address}
-                                </p>
-                                <div className="">
-                                    {openInformation && store && (
-                                        <GoogleMap
-                                            apiKey=""
-                                            defaultCenter={{
-                                                lat: +store?.latitude,
-                                                lng: +store?.longitude,
-                                            }}
-                                            defaultZoom={5}
-                                            options={{}}
-                                            mapMinHeight="400px"
-                                        >
-                                            <MapMarker
-                                                lat={store?.latitude}
-                                                lng={store?.longitude}
-                                                markerId={"address-location"}
-                                            ></MapMarker>
-                                        </GoogleMap>
-                                    )}
-                                </div>
-                                {store?.working_hours?.length && (
-                                    <>
-                                        <h2 className="font-bold text-md mt-4">
-                                            Working Hours
-                                        </h2>
-                                        <ul className="divide-y divide-gray-200">
-                                            {store?.working_hours.map(
-                                                (wh, index) => (
-                                                    <li
-                                                        key={index}
-                                                        className="py-3 flex items-center justify-between"
-                                                    >
-                                                        <div className="font-bold text-sm">
-                                                            {days[index]}
-                                                        </div>
-                                                        <div className="text-gray-500 text-sm">
-                                                            {wh.start}- {wh.end}
-                                                        </div>
-                                                    </li>
-                                                )
-                                            )}
-                                        </ul>
-                                    </>
-                                )}
-                            </div>
-                        </DialogPanel>
-                    </div>
-                </div>
-            </Dialog>
-
-            <Dialog
+                setOpen={setOpenInformation}
+                store={store!}
+            />
+            <StoreProductDialog
                 open={openProduct}
-                onClose={setOpenProduct}
-                className="relative z-10"
-            >
-                <DialogBackdrop
-                    transition
-                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                productQuantity={productQuantity}
+                store={store!}
+                setOpen={setOpenProduct}
+                selectedProduct={selectedProduct}
+                onDecreaseQuantity={() => setProductQuantity(prev => prev > 1 ? prev - 1 : 1)}
+                onIncreaseQuantity={() => setProductQuantity(prev => prev + 1)}
+            />
+
+            {
+                !!store &&
+                <StoreCartSummaryDialog
+                    open={openCartSummary}
+                    setOpen={setOpenCartSummary}
+                    store={store}
+                    onOpenShippingMethod={() => setOpenShippingMethod(true)}
                 />
+            }
 
-                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full h-full items-end justify-center text-center sm:items-center sm:p-0">
-                        <DialogPanel
-                            transition
-                            className="relative bg-gray-50 min-h-full h-full w-full transform text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in data-closed:sm:translate-y-0 data-closed:sm:scale-95"
-                        >
-                            <div
-                                className="hero relative h-[300px]"
-                                style={{
-                                    backgroundImage: `url(${selectedProduct?.main_image})`,
-                                }}
-                            >
-                                <div
-                                    className="flex justify-end items-center absolute p-4 w-full"
-                                    style={{ top: 0 }}
-                                >
-                                    <button
-                                        className="btn btn-circle size-8"
-                                        onClick={() => setOpenProduct(false)}
-                                    >
-                                        <XMarkIcon className="size-4" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-b-2xl p-4 shadow-lg">
-                                <h2 className="font-bold text-lg mb-2">
-                                    {selectedProduct?.name}
-                                </h2>
-                                <p className="text-gray-500 text-xs mb-5">
-                                    {selectedProduct?.description}
-                                </p>
-                                <div className="font-bold text-lg">
-                                    {selectedProduct?.price.toFixed(2)}€
-                                </div>
-                            </div>
-                            <div className="p-4">
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">
-                                        Notes
-                                    </legend>
-                                    <textarea
-                                        className="textarea h-24 bg-white w-full"
-                                        placeholder="Write your preferences..."
-                                    ></textarea>
-                                </fieldset>
-                            </div>
-                            <div className="bg-white p-4 shadow-lg flex justify-between gap-10">
-                                <ProductQuantityControls
-                                    quantity={productQuantity}
-                                    onDecreaseQuantity={() => setProductQuantity(prev => prev > 1 ? prev - 1 : 1)}
-                                    onIncreaseQuantity={() => setProductQuantity(prev => prev + 1)}
-                                />
-                                <div className="grow">
-                                    <button
-                                        className="btn btn-md btn-success btn-block text-white"
-                                        onClick={() => addToCart()}
-                                    >
-                                        Add to cart
-                                    </button>
-                                </div>
-                            </div>
-                        </DialogPanel>
-                    </div>
-                </div>
-            </Dialog>
-
-            <Dialog
-                open={openCartSummary}
-                onClose={setOpenCartSummary}
-                className="relative z-10"
-            >
-                <DialogBackdrop
-                    transition
-                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+            {!!store &&
+                <StoreShippingMethodDialog
+                    open={openShippingMethod}
+                    setOpen={setOpenShippingMethod}
+                    store={store}
                 />
+            }
 
-                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full h-full items-end justify-center text-center sm:items-center sm:p-0">
-                        <DialogPanel
-                            transition
-                            className="relative bg-gray-50 min-h-full h-full w-full transform text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in data-closed:sm:translate-y-0 data-closed:sm:scale-95"
-                        >
-                            <div
-                                className="flex justify-start items-center p-4 w-full"
-                                style={{ top: 0 }}
-                            >
-                                <button
-                                    className="btn btn-circle size-8"
-                                    onClick={() => setOpenCartSummary(false)}
-                                >
-                                    <ChevronLeftIcon className="size-4" />
-                                </button>
-                            </div>
-                            <div className="p-4">
-                                <h1 className="font-bold text-2xl">Cart</h1>
-                                <a
-                                    href="javascript:void(0)"
-                                    className="flex items-center gap-2"
-                                    onClick={() => setOpenShippingMethod(true)}
-                                >
-                                    <span className="text-xs capitalize">{shippingMethod}: 10' - 20'</span>
-                                    <ChevronDownIcon className="size-3" />
-                                </a>
 
-                            </div>
-                            {/* <Link to={"/stores/" + store?.id + "/checkout"}>
-                                <button
-                                    className="btn btn-lg btn-success btn-block text-white p-2 grid grid-cols-3"
-                                    onClick={() => setOpenCartSummary(true)}
-                                >
-                                    <div className="col-span-1 text-start">
-                                        <span className="inline-block p-1 min-w-[28px] font-bold text-black text-center rounded-lg bg-white text-sm">
-                                            {
-                                                cartProducts.reduce((total, product) => {
-                                                    return total + product.quantity;
-                                                }, 0)
-                                            }
-                                        </span>
-                                    </div>
-                                    <div className="col-span-1 font-bold text-lg text-black text-center">Cart</div>
-                                    <div className="col-span-1 font-bold text-black text-end">
-                                        {
-                                            cartProducts.reduce((total, product) => {
-                                                return total + (product.quantity * product.product.price);
-                                            }, 0)
-                                        }€
-                                    </div>
-                                </button>
-                            </Link> */}
-                        </DialogPanel>
-                    </div>
-                </div>
-            </Dialog>
-
-            <Dialog
-                open={openShippingMethod}
-                onClose={setOpenShippingMethod}
-                className="relative z-10"
-            >
-                <DialogBackdrop
-                    transition
-                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
-                />
-
-                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center text-center sm:items-center sm:p-0">
-                        <DialogPanel
-                            transition
-                            className="relative w-full min-w-full transform overflow-hidden rounded-t-xl bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8  sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
-                        >
-                            <div
-                                className="flex justify-start items-center p-4 w-full"
-                                style={{ top: 0 }}
-                            >
-                                <button
-                                    className="btn btn-circle size-8"
-                                    onClick={() => setOpenShippingMethod(false)}
-                                >
-                                    <ChevronLeftIcon className="size-4" />
-                                </button>
-                            </div>
-                            <div className="p-4">
-                                <fieldset>
-                                    <h1 className="font-bold text-2xl">Shipping Method</h1>
-                                    <p className="text-gray-500">Please select how you want to recieve your order</p>
-                                    <div className="mt-6 space-y-4">
-                                        {
-                                             (["delivery", "takeaway"] as ShippingMethods[]).map((sm, index, array) => {
-                                                return (
-                                                    <div
-                                                        key={sm}
-                                                        className={"flex items-center" + (index!==array.length -1 ? "border-b border-gray-200 pb-4" : "")}
-                                                    >
-                                                        <input
-                                                            defaultChecked={stores[store!.id].shippingMethod === sm}
-                                                            id={"shipping-method-" + sm}
-                                                            name="shipping-method"
-                                                            type="radio"
-                                                            value={sm}
-                                                            className="radio radio-success"
-                                                            onChange={() => updateShippingMethod(store!.id, sm)}
-                                                        />
-                                                        <label htmlFor={"shipping-method-" + sm} className="capitalize ml-3 block text-sm/6 font-medium text-gray-900">
-                                                            {sm}
-                                                        </label>
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                    </div>
-                                </fieldset>
-                            </div>
-                        </DialogPanel>
-                    </div>
-                </div>
-            </Dialog>
 
         </main>
     );

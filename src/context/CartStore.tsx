@@ -8,7 +8,7 @@ type CartProduct = {
     quantity: number
 };
 
-type CartStoreStore = {
+export type CartStoreStore = {
     products: CartProduct[];
     shippingMethod: "delivery" | "takeaway";
 };
