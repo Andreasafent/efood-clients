@@ -30,10 +30,7 @@ import { StoreShippingMethodDialog } from "../components/stores/StoreShippingMet
 function Store() {
     const params = useParams();
 
-    const stores = useCartStore(state => state.stores);
     const cartProducts = useCartStore(state => state.selectStore(+params.id!)?.products);
-
-    const addItem = useCartStore(state => state.addItem);
 
     const [loading, setLoading] = useState(true);
     const [store, setStore] = useState<StoreType | null>();

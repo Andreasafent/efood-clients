@@ -2,56 +2,62 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Address, AddressResponse, CreateAddressPayload, CreateAddressResponse } from "../../types/addresses";
 import axiosInstance from "../../api/axiosInstance";
-import { BuildingOffice2Icon, ChevronDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { BuildingOffice2Icon, ChevronDownIcon, ChevronRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import AddressForm from "../profile/AddressForm";
 import AddressesList from "./AddressesList";
 
-function Addresses(){
+type Props = {
+    cartSummary?: boolean
+}
+
+function Addresses({ cartSummary }: Props) {
     const localStorageAddress = localStorage.getItem("address");
-    
+
     const [addressesLoading, setAddressesLoading] = useState(false);
     const [loading, setLoading] = useState(false);
+
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
     const [openAddresses, setOpenAddresses] = useState(false);
     const [openCreateAddress, setOpenCreateAddress] = useState(false);
 
 
-    useEffect(()=>{
+    useEffect(() => {
         setAddressesLoading(true);
         axiosInstance.get<AddressResponse>("/client/addresses")
             .then((response) => {
-                if(!response.data.success){
+                if (!response.data.success) {
                     return;
                 }
 
                 setAddresses(response.data.data.addresses);
-                
-                if(localStorageAddress) {
+
+                if (localStorageAddress) {
                     const addressJson = JSON.parse(localStorageAddress) as Address;
                     const address = response.data.data.addresses.find(address => address.id === addressJson.id)!;
-                    if(address){
+                    if (address) {
                         setSelectedAddress(address);
                     }
                 };
             })
-            .finally(()=>{
+            .finally(() => {
                 setAddressesLoading(false);
             })
     }, []);
 
-    const onSubmit = (data: CreateAddressPayload) =>{
+    const onSubmit = (data: CreateAddressPayload) => {
         setLoading(true);
         axiosInstance.post<CreateAddressResponse>(
             "/client/addresses",
             {
-                ...data, 
+                ...data,
                 postal_code: data.postalCode
             }
         )
-            .then((response)=>{
-                if(!response.data.success){
+            .then((response) => {
+                if (!response.data.success) {
                     return;
                 }
 
@@ -62,7 +68,7 @@ function Addresses(){
                 setOpenCreateAddress(false);
                 setOpenAddresses(true);
             })
-            .finally(()=>{
+            .finally(() => {
                 setLoading(false);
             })
     }
@@ -74,23 +80,47 @@ function Addresses(){
     }
 
     return (
-        <div className="">
-            <button 
-                className="btn btn-ghost flex justify-between items-center"
-                onClick={()=>setOpenAddresses(true)}
-            >
-                <span>
-                {
-                    selectedAddress
-                        ? <span>{selectedAddress.street} {selectedAddress.number}</span>
-                        : ( addressesLoading 
-                                ? <div className="skeleton h-4 w-28"></div>
-                                : "No address selected..."
-                        )
-                }
-                </span>
-                <ChevronDownIcon className="size-3"/>
-            </button>
+        <div>
+            {
+                !cartSummary ? (
+                    <button
+                        className="btn btn-ghost flex justify-between items-center"
+                        onClick={() => setOpenAddresses(true)}
+                    >
+                        <span>{
+                            selectedAddress
+                                ? <span>{selectedAddress.street} {selectedAddress.number}</span>
+                                : (addressesLoading
+                                    ? <div className="skeleton h-4 w-28"></div>
+                                    : "No address selected..."
+                                )
+                        }</span>
+                        <ChevronDownIcon className="size-4" />
+                    </button>
+                ) : (
+                    <div className="w-full rounded-md border border-gray-300 bg-white">
+                        <a
+                            onClick={() => setOpenAddresses(true)}
+                            href="javascript:void(0)"
+                            className="flex justify-between items-center p-3"
+                        >
+                            <span>{
+                                selectedAddress
+                                    ? <>
+                                        <p className="font-bold">{selectedAddress.street} {selectedAddress.number}</p>
+                                        <p className="text-gray-500 text-xs">Change address</p>
+                                    </>
+                                    : (addressesLoading
+                                        ? <div className="skeleton h-4 w-28"></div>
+                                        : "No address selected..."
+                                    )
+                            }</span>
+                            <ChevronRightIcon className="size-6" />
+                        </a>
+                    </div>
+                )
+            }
+
 
             <Dialog open={openAddresses} onClose={setOpenAddresses} className="relative z-10">
                 <DialogBackdrop
@@ -114,14 +144,14 @@ function Addresses(){
                                     Addresses
                                 </DialogTitle>
                                 <div className="text-end">
-                                    <button 
+                                    <button
                                         className="btn btn-circle size-8"
                                         onClick={() => setOpenAddresses(false)}
                                     >
-                                        <XMarkIcon className="size-4"/>
+                                        <XMarkIcon className="size-4" />
                                     </button>
                                 </div>
-                                
+
 
                             </div>
                             <div className="">
@@ -130,8 +160,8 @@ function Addresses(){
                                         <div className="my-4 text-2xl text-center text-gray-400">No addresses yet...</div>
                                     ) : (
                                         <div className="my-4">
-                                            <AddressesList 
-                                                addresses={addresses} 
+                                            <AddressesList
+                                                addresses={addresses}
                                                 selectedAddress={selectedAddress}
                                                 onSelectAddress={onSelectAddress}
                                             />
@@ -201,7 +231,7 @@ function Addresses(){
                                         </GoogleMap>
                                     </div> */}
                                     <div className="mt-2">
-                                        <AddressForm onSubmit={onSubmit} loading={loading}/>
+                                        <AddressForm onSubmit={onSubmit} loading={loading} />
                                     </div>
                                 </div>
                             </div>
