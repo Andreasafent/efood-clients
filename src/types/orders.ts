@@ -1,10 +1,47 @@
+import { Address } from "./addresses";
 import { Category } from "./categories";
 import { BaseResponse } from "./helpers";
-import { ProductCategory } from "./products";
-import { PaymentMethod, ShippingMethod } from "./stores";
+import { Product, ProductCategory } from "./products";
+import { PaymentMethod, ShippingMethod, Store } from "./stores";
+
+export type PaymentStatus = "pending" | "completed" | "failed";
+export type ShippingStatus = "pending" | "completed" | "failed";
+export type OrderStatus = 'pending' | 'processing' | 'out_for_delivery' | 'completed' | 'cancelled';
 
 export type Order = {
+    id: number;
 
+    address_id: number;
+    address: Address;
+    coupon_code: string | null;
+    delivery_time: number;
+    discount: number;
+    note: string | null;
+    payment_id: number;
+    payment_method: PaymentMethod;
+    payment_status: PaymentStatus;
+    products: OrderProduct[];
+    products_price: number;
+    shipping_method: ShippingMethod;
+    shipping_price: number;
+    shipping_status: ShippingStatus;
+    status: OrderStatus;
+    store_id: number;
+    store: Store;
+    tip: number;
+    total_price: number;
+
+    created_at: string;
+    updated_at: string;
+};
+
+export type OrderProduct = {
+    note: string;
+    price: number; 
+    product_name: string;
+    quantity: number;
+    total_price: number;
+    product: Product;
 };
 
 export type OrderCreatePayload = {
@@ -27,3 +64,10 @@ export type OrderCreateResponse = BaseResponse<{
     viva_redirect_url: string;
 }>
 
+export type OrderListResponse = BaseResponse<{
+    orders: Order[];
+}>;
+
+export type OrderResponse = BaseResponse<{
+    order: Order;
+}>;

@@ -7,12 +7,14 @@ import Home from './pages/Home.tsx'
 import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
-import Profile from './pages/Profile.tsx'
 import AuthRoute from './components/helper/AuthRoute.tsx'
 import Stores from './pages/Stores.tsx'
 import NoAuthRoute from './components/helper/NoAuthRoute.tsx'
 import Store from './pages/Store.tsx'
 import Checkout from './pages/Checkout.tsx'
+import Account from './pages/Account.tsx'
+import Orders from './pages/Orders.tsx'
+import Order from './pages/Order.tsx'
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
@@ -50,11 +52,19 @@ createRoot(document.getElementById('root')!).render(
                             <Checkout />
                         </AuthRoute>
                     } />
-                    <Route path="/profile" element={
+                    <Route path="/account" element={
                         <AuthRoute>
-                            <Profile />
+                            <Account />
                         </AuthRoute>
                     } />
+                    <Route path="/orders" element={
+                        <AuthRoute>
+                            <Orders />
+                        </AuthRoute>
+                    } />
+                    <Route path='/orders/:id' element={
+						<AuthRoute><Order/></AuthRoute>
+					}/>
                 </Route>
             </Routes>
         </AuthProvider>

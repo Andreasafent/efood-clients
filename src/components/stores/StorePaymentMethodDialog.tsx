@@ -56,7 +56,9 @@ export function StorePaymentMethodDialog({ open, store, setOpen }: Props) {
                                                         onChange={() => updatePaymentMethod(store!.id, pm)}
                                                     />
                                                     <label htmlFor={"shipping-method-" + pm} className="capitalize ml-3 block text-sm/6 font-medium text-gray-900">
-                                                        {pm}
+                                                        {
+                                                            pm === "card" ? "Card" : "Cash"
+                                                        }
                                                     </label>
                                                 </div>
                                             )

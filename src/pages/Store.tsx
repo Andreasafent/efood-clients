@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { ShippingMethod, StoreResponse, Store as StoreType } from "../types/stores";
 import axiosInstance from "../api/axiosInstance";
 import { Product, ProductCategory } from "../types/products";
@@ -31,6 +31,7 @@ import { OrderCreatePayload, OrderCreateResponse } from "../types/orders";
 
 function Store() {
     const params = useParams();
+    const navigate = useNavigate();
 
     const cartProducts = useCartStore(state => state.selectStore(+params.id!)?.products);
     const paymentMethod = useCartStore(state => state.selectStore(+params.id!)?.paymentMethod);
@@ -118,7 +119,7 @@ function Store() {
                 if(response.data.data.viva_redirect_url) {
                     window.location.href = response.data.data.viva_redirect_url;
                 } else {
-                    // TODO: Redirect to the order page
+                    navigate("/orders/" + response.data.data.order.id);
                 }
 
             })
