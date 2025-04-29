@@ -1,31 +1,36 @@
 import { create } from 'zustand'
 import { Product } from '../types/products'
 import { persist } from 'zustand/middleware'
-import { ShippingMethods, Store } from '../types/stores'
+import { PaymentMethod, ShippingMethod, Store } from '../types/stores'
 
 export type CartProduct = {
     product: Product
     quantity: number
+    note?: string
 };
 
 export type CartStoreStore = {
     products: CartProduct[];
-    shippingMethod: "delivery" | "takeaway";
+    shippingMethod: ShippingMethod;
+    paymentMethod: PaymentMethod;
 };
 
 type CartStore = {
     stores: Record<number, CartStoreStore>;
     selectStore: (storeId: number) => CartStoreStore;
+    storeTotalProducts: (storeId: number) => number;
+    storeTotalPrice: (storeId: number) => number;
 
     selectProduct: (storeId: number, productId: number) => CartProduct | undefined;
     removeStore: (storeId: number) => void;
 
-    addItem: (storeId: number, product: Product, quantity: number) => void;
+    addItem: (storeId: number, product: Product, quantity: number, note?: string) => void;
     removeItem: (storeId: number, product: Product) => void;
     increaseQuantity: (storeId: number, product: Product, by?: number) => void;
     decreaseQuantity: (storeId: number, product: Product, by?: number) => void;
 
-    updateShippingMethod: (storeId: number, shippingMethod: ShippingMethods) => void;
+    updateShippingMethod: (storeId: number, shippingMethod: ShippingMethod) => void;
+    updatePaymentMethod: (storeId: number, paymentMethod: PaymentMethod) => void;
 
 }
 
@@ -40,18 +45,27 @@ export const useCartStore = create(
                 return get().stores?.[storeId]?.products.find(p => p.product.id === productId);
             },
 
+            storeTotalProducts: (storeId: number) => {
+                return get().stores?.[storeId]?.products.reduce((total, product) => total + product.quantity, 0);
+            },
+
+            storeTotalPrice: (storeId: number) => {
+                return get().stores?.[storeId]?.products.reduce((total, product) => total + (product.quantity * product.product.price), 0);
+            },
+
             removeStore: (storeId: number) => set((state) => {
                 delete state.stores[storeId];
                 return { ...state };
             }),
 
-            addItem: (storeId: number, product: Product, quantity: number) => set((state) => {
+            addItem: (storeId: number, product: Product, quantity: number, note?: string) => set((state) => {
                 const stores = state.stores;
 
                 if (!stores[storeId]) {
                     stores[storeId] = {
                         products: [],
-                        shippingMethod: "delivery"
+                        shippingMethod: "delivery",
+                        paymentMethod: "card"
                     };
                 }
 
@@ -59,13 +73,15 @@ export const useCartStore = create(
 
                 if (productIndex !== -1) {
                     stores[storeId].products[productIndex].quantity += quantity;
+                    stores[storeId].products[productIndex].note = note;
                     stores[storeId].products = [...stores[storeId].products];
                 } else {
                     stores[storeId].products = [
                         ...stores[storeId].products,
                         {
                             product,
-                            quantity
+                            quantity,
+                            note
                         }
                     ];
                 }
@@ -81,7 +97,7 @@ export const useCartStore = create(
                 stores[storeId].products = stores[storeId].products.filter(p => p.product.id !== product.id);
 
                 if (stores[storeId].products.length === 0) {
-                    get().removeStore(storeId);
+                    // get().removeStore(storeId);
                     return { ...state };
                 }
 
@@ -122,11 +138,20 @@ export const useCartStore = create(
                 return { ...state };
             }),
 
-            updateShippingMethod: (storeId: number, shippingMethod: ShippingMethods) => set((state) => {
+            updateShippingMethod: (storeId: number, shippingMethod: ShippingMethod) => set((state) => {
                 const stores = state.stores;
                 if(!stores[storeId]) {return state;}
 
                 stores[storeId].shippingMethod = shippingMethod;
+                state.stores = stores;
+
+                return { ...state };
+            }),
+            updatePaymentMethod: (storeId: number, paymentMethod: PaymentMethod) => set((state) => {
+                const stores = state.stores;
+                if(!stores[storeId]) {return state;}
+
+                stores[storeId].paymentMethod = paymentMethod;
                 state.stores = stores;
 
                 return { ...state };
